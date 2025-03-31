@@ -1,0 +1,22 @@
+# Vue.js frontend için Dockerfile
+FROM node:18 AS builder
+
+WORKDIR /app
+
+# Bağımlılıkları yükle
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Uygulama dosyalarını kopyala ve derle
+COPY . .
+RUN npm run build
+
+# Küçük bir Nginx imajı kullanarak frontend’i yayınla
+FROM nginx:alpine
+
+# Derlenen dosyaları Nginx dizinine kopyala
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Nginx'i başlat
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
